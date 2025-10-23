@@ -18,6 +18,7 @@
     "@aptos-labs/wallet-adapter-react": "^7.1.0",
     "@shelby-protocol/sdk": "0.0.3",
     "@shelby-protocol/ui": "workspace:*",
+    "country-state-city": "^3.2.1",
     "next": "^15.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

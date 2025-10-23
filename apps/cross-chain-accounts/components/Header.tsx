@@ -1,9 +1,15 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Button } from "@shelby-protocol/ui/components/button";
+import { toast } from "@shelby-protocol/ui/components/sonner";
 import { XChainWalletSelector } from "@shelby-protocol/ui/components/x-chain-wallet-selector";
 
 export const Header = () => {
   const { connected, account } = useWallet();
+
+  const onCopyNetworkUrl = () => {
+    navigator.clipboard.writeText('https://api.shelbynet.shelby.xyz/v1');
+    toast.success("Network URL copied to clipboard!");
+  };
 
   const onMintShelbyUsd = () => {
     if (!account) {
@@ -23,7 +29,10 @@ export const Header = () => {
         </h1>
       </div>
       <div className="flex items-center gap-3">
-        <Button disabled={!connected} onClick={() => onMintShelbyUsd()}>
+        <Button onClick={onCopyNetworkUrl}>
+          Copy shelbynet Network URL
+        </Button>
+        <Button disabled={!connected} onClick={onMintShelbyUsd}>
           Mint shelbyUSD
         </Button>
         <XChainWalletSelector

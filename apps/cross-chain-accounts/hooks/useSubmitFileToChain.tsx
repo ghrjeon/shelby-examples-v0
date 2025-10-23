@@ -17,7 +17,14 @@ import { useCallback, useState } from "react";
 import { getAptosClient, getShelbyClient } from "@/utils/client";
 
 interface UseSubmitFileToChainReturn {
-  submitFileToChain: (commitment: BlobCommitments, file: File) => Promise<void>;
+  submitFileToChain: (
+    commitment: BlobCommitments,
+    file: File,
+    expirationMicros: number,
+    erasure_n?: number,
+    erasure_k?: number,
+    erasure_d?: number
+  ) => Promise<string>;
   isSubmitting: boolean;
   error: string | null;
 }
@@ -29,7 +36,14 @@ export const useSubmitFileToChain = (): UseSubmitFileToChainReturn => {
     useWallet();
 
   const submitFileToChain = useCallback(
-    async (commitment: BlobCommitments, file: File) => {
+    async (
+      commitment: BlobCommitments, 
+      file: File, 
+      expirationMicros: number,
+      erasure_n?: number,
+      erasure_k?: number,
+      erasure_d?: number
+    ) => {
       if (!account || !wallet) {
         throw new Error("Account and wallet are required");
       }
@@ -38,14 +52,19 @@ export const useSubmitFileToChain = (): UseSubmitFileToChainReturn => {
       setError(null);
 
       try {
+        // Note: Erasure coding parameters (erasure_n, erasure_k, erasure_d) are 
+        // configured during the encoding phase and are part of the commitment.
+        // They are stored in the blob metadata but not directly in the registration payload.
         const payload = ShelbyBlobClient.createRegisterBlobPayload({
           account: account.address,
           blobName: file.name,
           blobMerkleRoot: commitment.blob_merkle_root,
           numChunksets: expectedTotalChunksets(commitment.raw_data_size),
-          expirationMicros: (1000 * 60 * 60 * 24 * 30 + Date.now()) * 1000, // 30 days from now in microseconds
+          expirationMicros: expirationMicros,
           blobSize: commitment.raw_data_size,
         });
+
+        let transactionHash: string;
 
         if (wallet.isAptosNativeWallet) {
           const transaction: InputTransactionData = {
@@ -57,6 +76,8 @@ export const useSubmitFileToChain = (): UseSubmitFileToChainReturn => {
           await getAptosClient().waitForTransaction({
             transactionHash: transactionSubmitted.hash,
           });
+          
+          transactionHash = transactionSubmitted.hash;
         } else {
           // Create the sponsor account
           const privateKey = new Ed25519PrivateKey(
@@ -94,7 +115,11 @@ export const useSubmitFileToChain = (): UseSubmitFileToChainReturn => {
           await getShelbyClient().aptos.waitForTransaction({
             transactionHash: transactionSubmitted.hash,
           });
+          
+          transactionHash = transactionSubmitted.hash;
         }
+        
+        return transactionHash;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An unknown error occurred";
