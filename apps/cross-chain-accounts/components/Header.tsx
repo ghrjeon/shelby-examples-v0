@@ -7,8 +7,9 @@ export const Header = () => {
   const { connected, account } = useWallet();
 
   const onCopyNetworkUrl = () => {
-    navigator.clipboard.writeText('https://api.shelbynet.shelby.xyz/v1');
-    toast.success("Network URL copied to clipboard!");
+    const url = 'https://api.shelbynet.shelby.xyz/v1';
+    navigator.clipboard.writeText(url);
+    toast.success(`Network URL copied to clipboard: ${url}`);
   };
 
   const onMintShelbyUsd = () => {
