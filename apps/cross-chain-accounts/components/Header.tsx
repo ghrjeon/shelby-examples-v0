@@ -22,6 +22,16 @@ export const Header = () => {
     );
   };
 
+  const onMintAptosTokens = () => {
+    if (!account) {
+      return;
+    }
+    window.open(
+      `https://docs.shelby.xyz/apis/faucet/aptos?address=${account.address}`,
+      "_blank",
+    );
+  };
+
   return (
     <header className="flex justify-between items-center py-5 border-b border-gray-200 dark:border-gray-700 mb-10">
       <div>
@@ -35,6 +45,9 @@ export const Header = () => {
         </Button>
         <Button disabled={!connected} onClick={onMintShelbyUsd}>
           Mint shelbyUSD
+        </Button>
+        <Button disabled={!connected} onClick={onMintAptosTokens}>
+          Mint Apots 
         </Button>
         <XChainWalletSelector
           size="sm"
